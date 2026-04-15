@@ -3,7 +3,7 @@
 #Just a simple example of RunnableLambda, RunnableSequence, RunnableParallel and RunnablePassThrough.
 #danielgaletti70@gmail.com
 
-from langchain_core.runnables import RunnableLambda, RunnablePassthrough
+from langchain_core.runnables import RunnableLambda, RunnablePassthrough, RunnableParallel
 
 def add_one(x):
     return x + 1
@@ -64,3 +64,24 @@ resposta = runnable.invoke({"num": 5})
 
 print("Resposta do RunnablePassthrough.assign: " + str(resposta))  # {'num': 5, 'multiplica_3': 15}
 print("-" * 50)
+
+
+# Exercício 
+
+runnable1 = RunnablePassthrough()
+
+def count_characters(x):
+    return len(x["input"])
+
+runnable2 = RunnableLambda(count_characters)
+runnable3 = RunnableLambda(lambda x: "Conseguiu " + x["original"]["input"])
+
+chain = runnable1 | RunnablePassthrough.assign(
+    original=RunnablePassthrough(),
+    num_caract=runnable2,
+) | RunnableParallel({
+    "passa_para_frente": RunnablePassthrough(),
+    "mensagem": runnable3
+})
+
+print(chain.invoke({"input": "Parabéns Você"}))
